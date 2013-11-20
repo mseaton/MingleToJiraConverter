@@ -4,6 +4,8 @@ public class Murmur {
 
 	private String id;
 	private String type;
+	private String author_id;
+	private String created_at;
 	private String murmur;
 	private String origin_id;
 	private String origin_type;
@@ -28,6 +30,22 @@ public class Murmur {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getAuthor_id() {
+		return author_id;
+	}
+
+	public void setAuthor_id(String author_id) {
+		this.author_id = author_id;
+	}
+
+	public String getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(String created_at) {
+		this.created_at = created_at;
 	}
 
 	public String getMurmur() {

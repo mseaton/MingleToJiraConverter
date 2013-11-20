@@ -1,20 +1,18 @@
 package org.pih;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ExportItem {
 
 	private Card card;
-	private Map<String, String> attachments;
-	private List<Comment> comments;
+	private List<UserEntry> attachments = new ArrayList<UserEntry>();
+	private List<UserEntry> comments = new ArrayList<UserEntry>();
 
 	public ExportItem() {}
 
 	public String toString() {
-		return card + ": " + getAttachments().size() + " attachments, " + getComments().size() + " comments";
+		return card + " (" + attachments.size() + " attachments,  " + comments.size() + " comments)";
 	}
 
 	public Card getCard() {
@@ -25,25 +23,19 @@ public class ExportItem {
 		this.card = card;
 	}
 
-	public Map<String, String> getAttachments() {
-		if (attachments == null) {
-			attachments = new HashMap<String, String>();
-		}
+	public List<UserEntry> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(Map<String, String> attachments) {
+	public void setAttachments(List<UserEntry> attachments) {
 		this.attachments = attachments;
 	}
 
-	public List<Comment> getComments() {
-		if (comments == null) {
-			comments = new ArrayList<Comment>();
-		}
+	public List<UserEntry> getComments() {
 		return comments;
 	}
 
-	public void setComments(List<Comment> comments) {
+	public void setComments(List<UserEntry> comments) {
 		this.comments = comments;
 	}
 }

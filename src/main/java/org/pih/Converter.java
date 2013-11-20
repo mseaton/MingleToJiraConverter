@@ -2,14 +2,18 @@ package org.pih;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Converter {
 
@@ -17,6 +21,10 @@ public class Converter {
 
 	public static List<Attachment> loadAttachments() {
 		return Util.loadList(MINGLE_DIRECTORY, "attachments", Attachment.class);
+	}
+
+	public static List<User> loadUsers() {
+		return Util.loadList(MINGLE_DIRECTORY, "users", User.class);
 	}
 
 	public static List<CardVersion> loadCardVersions() {
@@ -35,75 +43,153 @@ public class Converter {
 		return Util.loadList(MINGLE_DIRECTORY, "pih_mirebalais_cards", Card.class);
 	}
 
-	public static List<ExportItem> loadExportItems() {
+	public static ExportData loadExportData() {
 
-		Map<String, ExportItem> itemMap = new LinkedHashMap<String, ExportItem>();
-
-		for (Card card : loadCards()) {
-			ExportItem item = new ExportItem();
-			item.setCard(card);
-			itemMap.put(card.getId(), item);
-		}
+		ExportData data = new ExportData();
 
 		Map<String, Attachment> attachmentMap = new HashMap<String, Attachment>();
 		for (Attachment attachment : loadAttachments()) {
 			attachmentMap.put(attachment.getId(), attachment);
 		}
 
+		Map<String, User> userMap = new HashMap<String, User>();
+		for (User user : loadUsers()) {
+			userMap.put(user.getId(), user);
+		}
+
 		List<Attaching> attachings = loadAttachings();
+		List<Murmur> murmurs = loadMurmurs();
 
 		// Order versions by id
 		List<CardVersion> versions = loadCardVersions();
 		Collections.sort(versions, new Comparator<CardVersion>() {
 			public int compare(CardVersion cardVersion1, CardVersion cardVersion2) {
-				return cardVersion1.getId().compareTo(cardVersion2.getId());
+				return Integer.valueOf(cardVersion1.getId()).compareTo(Integer.valueOf(cardVersion2.getId()));
 			}
 		});
 
-		for (CardVersion version : versions) {
-			String versionId = version.getId();
-			String cardId = version.getCard_id();
-			ExportItem item = itemMap.get(cardId);
-			if (item != null) {
-				if (version.getComment() != null && !version.getComment().equals("")) {
-					Comment comment = new Comment();
-					comment.setComment(version.getComment());
-					comment.setUser(version.getModified_by_user_id());
-					comment.setDate(version.getUpdated_at());
-					item.getComments().add(comment);
-				}
-				for (Attaching attaching : attachings) {
-					if (attaching.getAttachable_id().equals(versionId)) {
-						Attachment attachment = attachmentMap.get(attaching.getAttachment_id());
-						item.getAttachments().put(attachment.getFile(), attachment.getPath() + "/" + attachment.getFile());
+		Map<String, Collection<UserEntry>> attachmentsForExport = new LinkedHashMap<String, Collection<UserEntry>>();
+		Map<String, Collection<UserEntry>> commentsForExport = new LinkedHashMap<String, Collection<UserEntry>>();
+
+		for (Card card : loadCards()) {
+
+			String cardId = card.getId();
+			String cardNumber = card.getNumber();
+			String cardType = card.getCard_type_name();
+			String createdBy = userMap.get(card.getCreated_by_user_id()).getLogin();
+			String createdDate = card.getCreated_at();
+
+			Map<String, UserEntry> attachments = new HashMap<String, UserEntry>();
+			List<UserEntry> comments = new ArrayList<UserEntry>();
+
+			for (CardVersion version : versions) {
+				if (version.getCard_id().equals(cardId)) {
+					String versionId = version.getId();
+
+					if (version.getComment() != null && !version.getComment().equals("")) {
+						UserEntry userEntry = new UserEntry();
+						userEntry.setComment(version.getComment());
+						userEntry.setUser(userMap.get(version.getModified_by_user_id()).getLogin());
+						userEntry.setDate(version.getUpdated_at());
+						comments.add(userEntry);
 					}
+
+					Set<String> idsFound = new HashSet<String>();
+					for (Attaching attaching : attachings) {
+						if (attaching.getAttachable_id().equals(versionId)) {
+							Attachment attachment = attachmentMap.get(attaching.getAttachment_id());
+							String attachmentId = attachment.getId();
+							UserEntry userEntry = attachments.get(attachmentId);
+							if (userEntry == null) {
+								userEntry = new UserEntry();
+								userEntry.setUser(userMap.get(version.getModified_by_user_id()).getLogin());
+								userEntry.setDate(version.getUpdated_at());
+								attachments.put(attachmentId, userEntry);
+							}
+							userEntry.setDirectoryPath(attachment.getPath());
+							userEntry.setFileName(attachment.getFile());
+							idsFound.add(attachmentId);
+						}
+					}
+					attachments.keySet().retainAll(idsFound);
 				}
 			}
-			else {
-				System.out.println("WARNING: NO CARD FOUND FOR VERSION: " + version);
+
+			for (Murmur murmur : murmurs) {
+				if (murmur.getOrigin_id().equals(cardId)) {
+					UserEntry userEntry = new UserEntry();
+					userEntry.setUser(userMap.get(murmur.getAuthor_id()).getLogin());
+					userEntry.setDate(murmur.getCreated_at());
+					userEntry.setComment(murmur.getMurmur());
+					comments.add(userEntry);
+				}
+			}
+
+			ExportItem exportItem = new ExportItem();
+			exportItem.setCard(card);
+			exportItem.getAttachments().addAll(attachments.values());
+			exportItem.getComments().addAll(comments);
+			data.getExportItems().add(exportItem);
+
+			if (attachments.size() > data.getMaxAttachments()) {
+				data.setMaxAttachments(attachments.size());
+			}
+
+			if (comments.size() > data.getMaxComments()) {
+				data.setMaxComments(comments.size());
 			}
 		}
-
-		for (Murmur murmur : loadMurmurs()) {
-			ExportItem item = itemMap.get(murmur.getOrigin_id());
-			if (item != null) {
-				Comment comment = new Comment();
-				comment.setComment(murmur.getMurmur());
-				item.getComments().add(comment);
-			}
-		}
-
-		return new ArrayList<ExportItem>(itemMap.values());
+		return data;
 	}
 
-	public static void exportAttachmentCsv(String directory) throws Exception {
-		CSVWriter writer = new CSVWriter(new FileWriter(directory), ',');
-		for (ExportItem item : loadExportItems()) {
-			for (String attachment: item.getAttachments().values()) {
-				String[] row = new String[] {item.getCard().getNumber(), attachment};
-				writer.writeNext(row);
+	public static void exportData(String directory) throws Exception {
+
+		ExportData data = loadExportData();
+
+		{
+			File f = new File(directory, "attachmentExport.csv");
+			CSVWriter writer = new CSVWriter(new FileWriter(f), ',');
+			String[] headerRow = new String[data.getMaxAttachments() + 1];
+			headerRow[0] = "Number";
+			for (int i=1; i<=data.getMaxAttachments(); i++) {
+				headerRow[i] = "Attachment";
 			}
+			writer.writeNext(headerRow);
+			for (ExportItem item : data.getExportItems()) {
+				if (item.getAttachments().size() > 0) {
+					String[] row = new String[data.getMaxAttachments() + 1];
+					row[0] = item.getCard().getNumber();
+					int num = 1;
+					for (UserEntry entry : item.getAttachments()) {
+						row[num++] = entry.getExportFormat();
+					}
+					writer.writeNext(row);
+				}
+			}
+			writer.close();
 		}
-		writer.close();
+
+		{
+			File f = new File(directory, "commentExport.csv");
+			CSVWriter writer = new CSVWriter(new FileWriter(f), ',');
+			String[] headerRow = new String[data.getMaxComments() + 1];
+			headerRow[0] = "Number";
+			for (int i=1; i<=data.getMaxComments(); i++) {
+				headerRow[i] = "Comment";
+			}
+			writer.writeNext(headerRow);
+			for (ExportItem item : data.getExportItems()) {
+				if (item.getComments().size() > 0) {
+					String[] row = new String[data.getMaxComments() + 1];
+					row[0] = item.getCard().getNumber();
+					int num = 1;
+					for (UserEntry entry : item.getComments()) {
+						row[num++] = entry.getExportFormat();
+					}
+					writer.writeNext(row);
+				}
+			}
+			writer.close();
+		}
 	}
 }

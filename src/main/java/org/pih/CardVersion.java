@@ -8,6 +8,8 @@ public class CardVersion {
 	private String card_id;
 	private String number;
 	private String version;
+	private String name;
+	private String description;
 	private String comment;
 	private String updated_at;
 	private String modified_by_user_id;
@@ -17,8 +19,6 @@ public class CardVersion {
 	public String toString() {
 		return id + " (card " + card_id + ", #" + number + " v" + version + ")";
 	}
-
-
 
 	public String getId() {
 		return id;
@@ -50,6 +50,22 @@ public class CardVersion {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public String getComment() {

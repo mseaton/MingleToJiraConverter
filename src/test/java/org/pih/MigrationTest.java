@@ -8,18 +8,8 @@ import java.util.List;
 public class MigrationTest {
 
 	@Test
-	public void shouldExportAttachmentCsv() throws Exception {
-		Converter.exportAttachmentCsv("/home/mseaton/Desktop/attachmentExport.csv");
-	}
-
-	@Test
-	public void shouldLoadExportItems() throws Exception {
-		List<ExportItem> exportItems = Converter.loadExportItems();
-		Assert.assertTrue(exportItems.size() > 0);
-		System.out.println("Found " + exportItems.size() + " items");
-		for (ExportItem item : exportItems) {
-			System.out.println(item);
-		}
+	public void shouldExportData() throws Exception {
+		Converter.exportData("/home/mseaton/Desktop");
 	}
 
 	@Test
@@ -28,6 +18,15 @@ public class MigrationTest {
 		Assert.assertTrue(attachments.size() > 0);
 		for (Attachment a : attachments) {
 			System.out.println(a);
+		}
+	}
+
+	@Test
+	public void shouldLoadUsers() throws Exception {
+		List<User> users = Converter.loadUsers();
+		Assert.assertTrue(users.size() > 0);
+		for (User u : users) {
+			System.out.println(u);
 		}
 	}
 
