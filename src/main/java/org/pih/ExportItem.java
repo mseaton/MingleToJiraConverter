@@ -6,6 +6,8 @@ import java.util.List;
 public class ExportItem {
 
 	private Card card;
+	private CardVersion latestVersion;
+	private List<String> tags = new ArrayList<String>();
 	private List<UserEntry> attachments = new ArrayList<UserEntry>();
 	private List<UserEntry> comments = new ArrayList<UserEntry>();
 
@@ -21,6 +23,22 @@ public class ExportItem {
 
 	public void setCard(Card card) {
 		this.card = card;
+	}
+
+	public CardVersion getLatestVersion() {
+		return latestVersion;
+	}
+
+	public void setLatestVersion(CardVersion latestVersion) {
+		this.latestVersion = latestVersion;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 
 	public List<UserEntry> getAttachments() {

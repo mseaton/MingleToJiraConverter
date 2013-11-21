@@ -65,4 +65,22 @@ public class MigrationTest {
 			System.out.println(c);
 		}
 	}
+
+	@Test
+	public void shouldLoadTags() throws Exception {
+		List<Tag> tags = Converter.loadTags();
+		Assert.assertTrue(tags.size() > 0);
+		for (Tag t : tags) {
+			System.out.println(t);
+		}
+	}
+
+	@Test
+	public void shouldLoadTaggings() throws Exception {
+		List<Tagging> taggings = Converter.loadTaggings();
+		Assert.assertTrue(taggings.size() > 0);
+		for (Tagging t : taggings) {
+			System.out.println(t);
+		}
+	}
 }
