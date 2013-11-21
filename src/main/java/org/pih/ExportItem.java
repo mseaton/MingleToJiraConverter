@@ -13,6 +13,11 @@ public class ExportItem {
 
 	public ExportItem() {}
 
+	public boolean isIterationOrRelease() {
+		String type = latestVersion.getCard_type_name();
+		return "Iteration".equals(type) || "Release".equals(type);
+	}
+
 	public String toString() {
 		return card + " (" + attachments.size() + " attachments,  " + comments.size() + " comments)";
 	}

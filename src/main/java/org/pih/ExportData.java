@@ -7,9 +7,10 @@ import java.util.Map;
 
 public class ExportData {
 
-	private Map<String, User> userMap = new HashMap<String, User>();
+	private Map<String, CardVersion> latestCardVersionMap = new HashMap<String, CardVersion>();
 	private Map<String, Attachment> attachmentMap = new HashMap<String, Attachment>();
 	private Map<String, Tag> tagMap = new HashMap<String, Tag>();
+	private Map<String, User> userMap = new HashMap<String, User>();
 
 	private int maxAttachments = 0;
 	private int maxComments = 0;
@@ -45,12 +46,12 @@ public class ExportData {
 		this.exportItems = exportItems;
 	}
 
-	public Map<String, User> getUserMap() {
-		return userMap;
+	public Map<String, CardVersion> getLatestCardVersionMap() {
+		return latestCardVersionMap;
 	}
 
-	public void setUserMap(Map<String, User> userMap) {
-		this.userMap = userMap;
+	public void setLatestCardVersionMap(Map<String, CardVersion> latestCardVersionMap) {
+		this.latestCardVersionMap = latestCardVersionMap;
 	}
 
 	public Map<String, Attachment> getAttachmentMap() {
@@ -67,5 +68,13 @@ public class ExportData {
 
 	public void setTagMap(Map<String, Tag> tagMap) {
 		this.tagMap = tagMap;
+	}
+
+	public Map<String, User> getUserMap() {
+		return userMap;
+	}
+
+	public void setUserMap(Map<String, User> userMap) {
+		this.userMap = userMap;
 	}
 }

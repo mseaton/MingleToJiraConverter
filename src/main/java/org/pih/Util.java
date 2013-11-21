@@ -116,7 +116,11 @@ public class Util {
 	}
 
 	public static String getUsername(String key, Map<String, User> userMap) {
-		return userMap.get(key).getLogin();
+		User u = userMap.get(key);
+		if (u != null) {
+			return u.getLogin();
+		}
+		return "";
 	}
 
 	public static String newLine() {
@@ -127,4 +131,8 @@ public class Util {
 		return s != null && !s.equals("");
 	}
 
+	public static String convertFromHtmlToWikiMarkup(String html) {
+		String wiki = "{html}" + html + "{html}";
+		return wiki;
+	}
 }

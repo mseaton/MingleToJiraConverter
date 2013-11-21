@@ -37,8 +37,14 @@ public class CardVersion {
 
 	private String system_generated_comment; // Not sure whether this is used or not
 
+	// These are only for cards that represent releases and iterations
+	private String cp_release_date; // Date a release is planned to go live (only one value in db for this for release 1)
+	private String cp_iteration_start_date; // Date an iteration is planned to start (only used for iterations)
+	private String cp_iteration_end_date; // Date an iteration is planned to end (only used for iterations)
+
 	/**
 	 * Not taking:
+	 * cp_defect_iteration___iteration_card_id; // For defects, What iteration is this defect assigned to (iteration card id)
 	 * cp_duration:  all seem to be negative values and sporadic?
 	 * cp_release___task_card_id:  "Release - Task" is the name of the field.  what is this?
 	 * created_at:  On needed on card I think
@@ -266,5 +272,29 @@ public class CardVersion {
 
 	public void setSystem_generated_comment(String system_generated_comment) {
 		this.system_generated_comment = system_generated_comment;
+	}
+
+	public String getCp_release_date() {
+		return cp_release_date;
+	}
+
+	public void setCp_release_date(String cp_release_date) {
+		this.cp_release_date = cp_release_date;
+	}
+
+	public String getCp_iteration_start_date() {
+		return cp_iteration_start_date;
+	}
+
+	public void setCp_iteration_start_date(String cp_iteration_start_date) {
+		this.cp_iteration_start_date = cp_iteration_start_date;
+	}
+
+	public String getCp_iteration_end_date() {
+		return cp_iteration_end_date;
+	}
+
+	public void setCp_iteration_end_date(String cp_iteration_end_date) {
+		this.cp_iteration_end_date = cp_iteration_end_date;
 	}
 }
