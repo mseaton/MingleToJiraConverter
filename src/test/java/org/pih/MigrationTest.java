@@ -3,7 +3,9 @@ package org.pih;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MigrationTest {
 

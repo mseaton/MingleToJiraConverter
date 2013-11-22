@@ -101,7 +101,7 @@ public class Converter {
 						comment.append(version.getComment()).append(Util.newLine()).append(Util.newLine());
 					}
 					if (exportItem.getLatestVersion() != null) {
-						String changes = Util.getChanges(exportItem.getLatestVersion(), version, data.getUserMap());
+						String changes = Util.getChanges(exportItem.getLatestVersion(), version, data);
 						if (Util.notNull(changes)) {
 							comment.append(changes);
 						}
@@ -111,7 +111,7 @@ public class Converter {
 					if (Util.notNull(comment.toString())) {
 						UserEntry commentEntry = new UserEntry();
 						commentEntry.setComment(comment.toString());
-						commentEntry.setUser(Util.getUsername(version.getModified_by_user_id(), data.getUserMap()));
+						commentEntry.setUser(Util.getUsername(version.getModified_by_user_id(), data));
 						commentEntry.setDate(version.getUpdated_at());
 						itemComments.add(commentEntry);
 					}
@@ -124,7 +124,7 @@ public class Converter {
 							UserEntry attachmentEntry = itemAttachments.get(attachmentId);
 							if (attachmentEntry == null) {
 								attachmentEntry = new UserEntry();
-								attachmentEntry.setUser(Util.getUsername(version.getModified_by_user_id(), data.getUserMap()));
+								attachmentEntry.setUser(Util.getUsername(version.getModified_by_user_id(), data));
 								attachmentEntry.setDate(version.getUpdated_at());
 								itemAttachments.put(attachmentId, attachmentEntry);
 							}
@@ -147,7 +147,7 @@ public class Converter {
 			for (Murmur murmur : murmurs) {
 				if (murmur.getOrigin_id().equals(cardId)) {
 					UserEntry userEntry = new UserEntry();
-					userEntry.setUser(Util.getUsername(murmur.getAuthor_id(), data.getUserMap()));
+					userEntry.setUser(Util.getUsername(murmur.getAuthor_id(), data));
 					userEntry.setDate(murmur.getCreated_at());
 					userEntry.setComment(murmur.getMurmur());
 					itemComments.add(userEntry);
@@ -181,6 +181,7 @@ public class Converter {
 		List<String> headers = new ArrayList<String>();
 		headers.add("Number");
 		headers.add("Type");
+		headers.add("Subtype");
 		headers.add("Summary");
 		headers.add("Description");
 		headers.add("CreatedBy");
@@ -189,12 +190,14 @@ public class Converter {
 		headers.add("WorkAcceptedDate");
 		headers.add("LastModifiedBy");
 		headers.add("LastModifiedDate");
-		headers.add("Status");
+		headers.add("Status1");
+		headers.add("Status2");
 		headers.add("Priority");
 		headers.add("Estimate");
 		headers.add("AssignedTo");
 		headers.add("PlannedRelease");
 		headers.add("PlannedIteration");
+		headers.add("ParentNumber");
 		headers.add("Labels");
 
 		for (int i=1; i<=data.getMaxComments(); i++) {
@@ -213,28 +216,26 @@ public class Converter {
 
 				Card card = item.getCard();
 				CardVersion version = item.getLatestVersion();
+				CardVersion parentStory = data.getLatestCardVersionMap().get(version.getCp_story_task_card_id());
 
 				row.add(card.getNumber());
-
-				String cardType = version.getCard_type_name();
-				if (Util.notNull(version.getCp_story_type())) {
-					cardType += " - " + version.getCp_story_type();
-				}
-				row.add(cardType);
+				row.add(parentStory != null ? "SubTask" : version.getCard_type_name());
+				row.add(version.getCp_story_type());
 				row.add(version.getName());
 				row.add(Util.convertFromHtmlToWikiMarkup(version.getDescription()));
 
-				row.add(Util.getUsername(card.getCreated_by_user_id(), data.getUserMap()));
+				row.add(Util.getUsername(card.getCreated_by_user_id(), data));
 				row.add(card.getCreated_at());
-				row.add(version.getCp_start_date());
-				row.add(version.getCp_qa_accepted_date());
-				row.add(Util.getUsername(version.getModified_by_user_id(), data.getUserMap()));
+				row.add(Util.formatDateStr(version.getCp_start_date()));
+				row.add(Util.formatDateStr(version.getCp_qa_accepted_date()));
+				row.add(Util.getUsername(version.getModified_by_user_id(), data));
 				row.add(version.getUpdated_at());
 
 				String status = version.getCp_status();
 				if (Util.notNull(version.getCp_progress())) {
 					status = version.getCp_progress();
 				}
+				row.add(status);
 				row.add(status);
 
 				String priority = version.getCp_defect_severity();
@@ -245,12 +246,11 @@ public class Converter {
 
 				row.add(version.getCp_estimate());
 
-				row.add(Util.getUsername(version.getCp_assigned_to_user_id(), data.getUserMap()));
+				row.add(Util.getUsername(version.getCp_assigned_to_user_id(), data));
 
 				List<String> tags = item.getTags();
 				CardVersion plannedReleaseCardVersion = data.getLatestCardVersionMap().get(version.getCp_release___release_card_id());
 				CardVersion plannedIterationCardVersion = data.getLatestCardVersionMap().get(version.getCp_iteration_planned_card_id());
-				CardVersion parentStory = data.getLatestCardVersionMap().get(version.getCp_story_task_card_id());
 
 				String plannedReleaseName = Util.notNull(plannedReleaseCardVersion) ? plannedReleaseCardVersion.getName() : "";
 				String plannedIterationName = Util.notNull(plannedIterationCardVersion) ? plannedIterationCardVersion.getName() : "";
@@ -258,16 +258,7 @@ public class Converter {
 
 				row.add(plannedReleaseName);
 				row.add(plannedIterationName);
-
-				if (Util.notNull(plannedReleaseName)) {
-					tags.add(plannedReleaseName);
-				}
-				if (Util.notNull(plannedIterationName)) {
-					tags.add(plannedIterationName);
-				}
-				if (Util.notNull(parentStoryNumber)) {
-					tags.add("SubTask Of: " + parentStoryNumber);
-				}
+				row.add(parentStoryNumber);
 
 				StringBuilder tagCell = new StringBuilder();
 				for (String tag : tags) {
