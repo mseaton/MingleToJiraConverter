@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class Converter {
 
-	public static final String MINGLE_DIRECTORY = "/home/mseaton/Desktop/pih_mirebalais";
+	public static final String MINGLE_DIRECTORY = "/home/mseaton/Desktop/mingleToJira/pih_mirebalais";
 
 	public static List<User> loadUsers() {
 		return Util.loadList(MINGLE_DIRECTORY, "users", User.class);
@@ -128,7 +128,7 @@ public class Converter {
 								attachmentEntry.setDate(version.getUpdated_at());
 								itemAttachments.put(attachmentId, attachmentEntry);
 							}
-							attachmentEntry.setDirectoryPath(attachment.getPath());
+							attachmentEntry.setDirectoryPath(attachment.getPath() + "/" + attachment.getId());
 							attachmentEntry.setFileName(attachment.getFile());
 							idsFound.add(attachmentId);
 						}
