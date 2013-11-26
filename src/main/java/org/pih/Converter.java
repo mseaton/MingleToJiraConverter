@@ -238,17 +238,16 @@ public class Converter {
 				row.add(status);
 				row.add(status);
 
-				String priority = version.getCp_defect_severity();
-				if ("Yes".equals(version.getCp_blocked_())) {
-					priority = "Blocker";
-				}
-				row.add(priority);
-
+				row.add(version.getCp_defect_severity());
 				row.add(version.getCp_estimate());
 
 				row.add(Util.getUsername(version.getCp_assigned_to_user_id(), data));
 
 				List<String> tags = item.getTags();
+				if ("Yes".equals(version.getCp_blocked_())) {
+					tags.add("Blocked");
+				}
+
 				CardVersion plannedReleaseCardVersion = data.getLatestCardVersionMap().get(version.getCp_release___release_card_id());
 				CardVersion plannedIterationCardVersion = data.getLatestCardVersionMap().get(version.getCp_iteration_planned_card_id());
 
