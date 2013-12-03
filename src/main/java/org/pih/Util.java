@@ -130,7 +130,7 @@ public class Util {
 	public static String getUsername(String key, ExportData data) {
 		User u = data.getUserMap().get(key);
 		if (u != null) {
-			return u.getLogin();
+			return normalizeUsername(u.getLogin());
 		}
 		return "";
 	}
@@ -202,5 +202,24 @@ public class Util {
 		if ("cp_toggle_due_date".equals(property)) { return "Feature Toggle Due Date"; }
 		if ("system_generated_comment".equals(property)) { return "System-generated Comment"; }
 		return property;
+	}
+
+	public static String normalizeUsername(String username) {
+		if ("ball".equals(username)) {
+			return "ellenball";
+		}
+		if ("cosmin.ioan".equals(username)) {
+			return "cioan";
+		}
+		if ("djazayeri".equals(username)) {
+			return "jazayeri";
+		}
+		if ("mgoodrich".equals(username)) {
+			return "mogoodrich";
+		}
+		if ("cordt".equals(username)) {
+			return "cbyrne";
+		}
+		return username;
 	}
 }

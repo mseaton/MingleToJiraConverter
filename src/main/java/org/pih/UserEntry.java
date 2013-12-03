@@ -17,7 +17,7 @@ public class UserEntry {
 	public String getExportFormat() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(date).append(";");
-		sb.append(user).append(";");
+		sb.append(Util.normalizeUsername(user)).append(";");
 		if (fileName != null) {
 			sb.append(fileName).append(";");
 			sb.append("file://").append(directoryPath + "/" + fileName);
